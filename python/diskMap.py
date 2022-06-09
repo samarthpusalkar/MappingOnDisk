@@ -4,13 +4,15 @@ BLOCK_SIZE = 4096
 class DiskMap:
     def __init__(self,path=".",name="test.dm"):
         self.file = None;
+        self.filePath = os.path.join(path,name)
         if os.path.exists(os.path.join(path,name)):
-            self.file = open(os.path.join(path,name));
+            self.file = open(os.path.join(path,name),"r+");
             #self.file.write(0);
             return;
         os.makedirs(os.path.basename(path),exist_ok=True);
-        self.filePath = os.path.join(path,name)
-        self.file = open(self.filePath);
+        self.file = open(self.filePath,"w+")
+        self.file.write("0")
+        self.file.flush()
         return;
     
     def add(self,key,value=None):
@@ -27,6 +29,15 @@ class DiskMap:
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
         return vtp(self.file, maxID, hashID)
 
+    def delete(self, key):
+        if(not key):
+            raise "Please Provide Key";
+        hashID=hash(key)
+        maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
+        return vtp(self.file, maxID, hashID, delete=True)
+    def close(self):
+        self.file.close()
+        self.__del__()
     """def seekTo(self,key):
         self.file.seek(0);
         for i in range(len(key)):
@@ -56,42 +67,70 @@ class DiskMap:
     @staticmethod
 
     def hash(key):
-        hashId = 0
+        hashID = 0
         for char in key:
-            hashID+=10*hashId+int(char)
-        return hashId
+            hashID+=10*hashID+int(char)
+        return hashID
             
-    def vtp(fd, maxID, hashID, isWrite=False, data=0):
+    def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False):
         mod = 500
         inc = 250
         inc_change = 25
         phyAdr = hashID%(mod)
         blockSize = BLOCK_SIZE
-        if(isWrite):
-            mm = mmap.mmap(fd.fileno(),0,prot=PROT_WRITE)
-            while(mm[blockSize*phyAdr:blockSize*phyAdr+1]):
-                if str(hashID) == mm[blockSize*phyAdr+1:blockSize*(phyAdr)+blockSize].decode("utf-8")[:len(str(hashID))]:
+        if(isWrite or delete):
+            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
+            while(mm[blockSize*phyAdr:blockSize*phyAdr+1].decode("utf-8")=="1"):
+                fd.seek(phyAdr*blockSize+1)
+                if str(hashID) == fd.read(len(str(hashID)))
                     break;  
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
                 if mod>maxId:
                     end = (mod if (mod>phyAdr) else (phyAdr+1))
-                    mm[blockSize*maxID:blockSize*end]=0
+                    fd.seek(blockSize*end)
+                    fd.write("0")
+                    fd.flush()
+                    mm.close()
+                    mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
                     maxID = end
-            mm[blockSize*phyAdr]=1
-            mm[blockSize*phyAdr+1:]=bytes(str(data), 'utf-8')
-            return mm[blockSize*phyAdr:blockSize*phyAdr+blockSize].decode("utf-8")
+            try:
+                if(delete):
+                    fd.seek(blockSize*phyAdr)
+                    fd.write((blockSize)*"\0")
+                    fd.flush()
+                    mm.close()
+                    return True
+                else:
+                    fd.seek(blockSize*phyAdr)
+                    fd.write("1")
+                    fd.seek(blockSize*phyAdr+1)
+                    fd.write((blockSize-1)*"\0")
+                    fd.seek(blockSize*phyAdr+1)
+                    fd.write(str(hashID))
+                    fd.write(str(data))
+                    fd.flush()
+            except:
+                return None
+            fd.seek(blockSize*phyAdr+1+len(str(hashID)))
+            dataWritten = fd.read(blockSize-1-len(str(hashID)))
+            mm.close()
+            return dataWritten
         else:
             mm = mmap.mmap(fd.fileno(),0,prot=PROT_READ)
-            while(mm[blockSize*phyAdr:blockSize*phyAdr+1]):
-                if str(hashID) == mm[blockSize*phyAdr+1:blockSize*(phyAdr)+blockSize].decode("utf-8")[:len(str(hashID))]:
+            while(True):
+                fd.seek(phyAdr*blockSize+1)
+                if str(hashID) == fd.read(len(str(hashID)))
                     break;  
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
                 if mod>maxId:
+                    mm.close()
                     return None
-            return mm[blockSize*phyAdr:blockSize*phyAdr+blockSize].decode("utf-8")
-                
+            fd.seek(blockSize*phyAdr+1+len(str(hashID)))
+            dataRead = fd.read(blockSize-1-len(str(hashID)))
+            mm.close()
+            return dataRead
         
