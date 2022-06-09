@@ -18,23 +18,23 @@ class DiskMap:
     def add(self,key,value=None):
         if(not key):
             raise "Please Provide Key";
-        hashID=hash(key)
+        hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return vtp(self.file, maxID, hashID, isWrite=True, data=value)
+        return DiskMap.vtp(self.file, maxID, hashID, isWrite=True, data=value)
     
     def read(self,key):
         if(not key):
             raise "Please Provide Key";
-        hashID=hash(key)
+        hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return vtp(self.file, maxID, hashID)
+        return DiskMap.vtp(self.file, maxID, hashID)
 
     def delete(self, key):
         if(not key):
             raise "Please Provide Key";
-        hashID=hash(key)
+        hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return vtp(self.file, maxID, hashID, delete=True)
+        return DiskMap.vtp(self.file, maxID, hashID, delete=True)
     def close(self):
         self.file.close()
         self.__del__()
