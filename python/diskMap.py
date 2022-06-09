@@ -69,7 +69,7 @@ class DiskMap:
     def hash(key):
         hashID = 0
         for char in key:
-            hashID+=10*hashID+int(char)
+            hashID+=100*hashID+ord(char)
         return hashID
             
     def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False):
@@ -87,7 +87,7 @@ class DiskMap:
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
-                if mod>maxId:
+                if mod>maxID:
                     end = (mod if (mod>phyAdr) else (phyAdr+1))
                     fd.seek(blockSize*end)
                     fd.write("0")
@@ -118,7 +118,7 @@ class DiskMap:
             mm.close()
             return dataWritten
         else:
-            mm = mmap.mmap(fd.fileno(),0,prot=PROT_READ)
+            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
             while(True):
                 fd.seek(phyAdr*blockSize+1)
                 if str(hashID) == fd.read(len(str(hashID))):
@@ -126,7 +126,7 @@ class DiskMap:
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
-                if mod>maxId:
+                if mod>maxID:
                     mm.close()
                     return None
             fd.seek(blockSize*phyAdr+1+len(str(hashID)))
