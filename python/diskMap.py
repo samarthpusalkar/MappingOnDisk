@@ -14,14 +14,14 @@ class DiskMap:
         return;
     
     def add(self,key,value=None):
-        if(!key):
+        if(not key):
             raise "Please Provide Key";
         hashID=hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
         return vtp(self.file, maxID, hashID, isWrite=True, data=value)
     
     def read(self,key):
-        if(!key):
+        if(not key):
             raise "Please Provide Key";
         hashID=hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
