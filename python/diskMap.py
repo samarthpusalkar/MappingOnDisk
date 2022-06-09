@@ -27,7 +27,7 @@ class DiskMap:
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
         return vtp(self.file, maxID, hashID)
 
-    def seekTo(self,key):
+    """def seekTo(self,key):
         self.file.seek(0);
         for i in range(len(key)):
             reqGroup = key[0:i]
@@ -52,7 +52,7 @@ class DiskMap:
                 self.file.seek(groupEndPos)
                 self.addGroup(reqGroup)
             }
-
+    """
     @staticmethod
 
     def hash(key):
