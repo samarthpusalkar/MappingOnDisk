@@ -82,7 +82,7 @@ class DiskMap:
             mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
             while(mm[blockSize*phyAdr:blockSize*phyAdr+1].decode("utf-8")=="1"):
                 fd.seek(phyAdr*blockSize+1)
-                if str(hashID) == fd.read(len(str(hashID)))
+                if str(hashID) == fd.read(len(str(hashID))):
                     break;  
                 mod+=inc
                 inc+=inc_change
@@ -121,7 +121,7 @@ class DiskMap:
             mm = mmap.mmap(fd.fileno(),0,prot=PROT_READ)
             while(True):
                 fd.seek(phyAdr*blockSize+1)
-                if str(hashID) == fd.read(len(str(hashID)))
+                if str(hashID) == fd.read(len(str(hashID))):
                     break;  
                 mod+=inc
                 inc+=inc_change
