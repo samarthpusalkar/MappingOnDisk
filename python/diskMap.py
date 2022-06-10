@@ -114,28 +114,29 @@ class DiskMap:
         else:
             mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
             while(True):
-                fd.seek(phyAdr*blockSize+1)
-                if str(hashID) == fd.read(len(str(hashID))):
-                    break;  
+                fd.seek(phyAdr*blockSize)
+                if (fd.read(1)=="1" and str(hashID) == fd.read(len(str(hashID)))):
+                    if(delete):
+                        try:
+                            fd.seek(blockSize*phyAdr)
+                            fd.write("00")
+                            fd.flush()
+                            mm.close()
+                            return True
+                        except:
+                            mm.close()
+                            return None
+
+                    fd.seek(blockSize*phyAdr+1+len(str(hashID)))
+                    dataRead = fd.read(blockSize-1-len(str(hashID)))
+                    mm.close()
+                    return dataRead
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
                 if mod>maxID:
                     mm.close()
                     return None
-            if(delete):
-                try:
-                    fd.seek(blockSize*phyAdr)
-                    fd.write((blockSize)*"\0")
-                    fd.flush()
-                    mm.close()
-                    return True
-                except:
-                    mm.close()
-                    return None
-
-            fd.seek(blockSize*phyAdr+1+len(str(hashID)))
-            dataRead = fd.read(blockSize-1-len(str(hashID)))
-            mm.close()
-            return dataRead
+            return None
+            
         
