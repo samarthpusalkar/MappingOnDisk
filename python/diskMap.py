@@ -34,7 +34,8 @@ class DiskMap:
             raise "Please Provide Key";
         hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, delete=True)
+        return DiskMap.vtp(self.file, maxID, hashID, isWrite=False, delete=True)
+        
     def close(self):
         self.file.close()
         self.__del__()
@@ -78,7 +79,7 @@ class DiskMap:
         inc_change = 25
         phyAdr = hashID%(mod)
         blockSize = BLOCK_SIZE
-        if(isWrite or delete):
+        if(isWrite):
             mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
             while(mm[blockSize*phyAdr:blockSize*phyAdr+1].decode("utf-8")=="1"):
                 fd.seek(phyAdr*blockSize+1)
@@ -96,21 +97,14 @@ class DiskMap:
                     mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
                     maxID = end
             try:
-                if(delete):
-                    fd.seek(blockSize*phyAdr)
-                    fd.write((blockSize)*"\0")
-                    fd.flush()
-                    mm.close()
-                    return True
-                else:
-                    fd.seek(blockSize*phyAdr)
-                    fd.write("1")
-                    fd.seek(blockSize*phyAdr+1)
-                    fd.write((blockSize-1)*"\0")
-                    fd.seek(blockSize*phyAdr+1)
-                    fd.write(str(hashID))
-                    fd.write(str(data))
-                    fd.flush()
+                fd.seek(blockSize*phyAdr)
+                fd.write("1")
+                fd.seek(blockSize*phyAdr+1)
+                fd.write((blockSize-1)*"\0")
+                fd.seek(blockSize*phyAdr+1)
+                fd.write(str(hashID))
+                fd.write(str(data))
+                fd.flush()
             except:
                 return None
             fd.seek(blockSize*phyAdr+1+len(str(hashID)))
@@ -129,6 +123,17 @@ class DiskMap:
                 if mod>maxID:
                     mm.close()
                     return None
+            if(delete):
+                try:
+                    fd.seek(blockSize*phyAdr)
+                    fd.write((blockSize)*"\0")
+                    fd.flush()
+                    mm.close()
+                    return True
+                except:
+                    mm.close()
+                    return None
+
             fd.seek(blockSize*phyAdr+1+len(str(hashID)))
             dataRead = fd.read(blockSize-1-len(str(hashID)))
             mm.close()
