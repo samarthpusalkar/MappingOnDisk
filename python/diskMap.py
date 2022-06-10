@@ -70,7 +70,7 @@ class DiskMap:
     def hash(key):
         hashID = 0
         for char in key:
-            hashID+=100*hashID+ord(char)
+            hashID+=12000*hashID+ord(char)
         return hashID
             
     def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False):
