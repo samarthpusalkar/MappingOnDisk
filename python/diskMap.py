@@ -38,7 +38,11 @@ class DiskMap:
         
     def close(self):
         self.file.close()
-        self.__del__()
+        #self.__del__()
+
+    def shrink(self):
+        maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
+        return DiskMap.vtp(self.file, maxID, None, isWrite=False, delete=True, shrink=True)
     """def seekTo(self,key):
         self.file.seek(0);
         for i in range(len(key)):
@@ -73,7 +77,7 @@ class DiskMap:
             hashID+=12000*hashID+ord(char)
         return hashID
             
-    def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False):
+    def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False, shrink = False):
         mod = 3001
         inc = 803
         inc_change = 1
@@ -93,10 +97,12 @@ class DiskMap:
                     end = phyAdr
                     fd.seek(blockSize*end)
                     fd.write("0")
+                    fd.seek(blockSize*end+blockSize-1)
+                    fd.write("0")
                     fd.flush()
                     mm.close()
                     mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
-                    maxID = end
+                    maxID = end+1
             try:
                 fd.seek(blockSize*phyAdr)
                 fd.write("1")
@@ -112,7 +118,7 @@ class DiskMap:
             dataWritten = fd.read(blockSize-1-len(str(hashID)))
             mm.close()
             return dataWritten
-        else:
+        elif(hashID):
             mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
             while(True):
                 fd.seek(phyAdr*blockSize)
@@ -139,5 +145,17 @@ class DiskMap:
                     mm.close()
                     return None
             return None
+        elif(shrink):
+            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
+            while(mm[blockSize*(maxID-1):blockSize*(maxID-1)+1].decode("utf-8")!="1"):
+                fd.seek((maxID-1)*blockSize)
+                try:
+                    os.truncate(fd, (maxID-1)*blockSize)
+                    maxID-=1
+                except OSError as error:
+                    mm.close()
+                    return None
+            mm.close()
+            return True
             
         
