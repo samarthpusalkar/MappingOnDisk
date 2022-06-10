@@ -74,9 +74,9 @@ class DiskMap:
         return hashID
             
     def vtp(fd, maxID, hashID, isWrite=False, data=0, delete=False):
-        mod = 500
-        inc = 250
-        inc_change = 25
+        mod = 3001
+        inc = 803
+        inc_change = 1
         phyAdr = hashID%(mod)
         blockSize = BLOCK_SIZE
         if(isWrite):
@@ -88,8 +88,9 @@ class DiskMap:
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+1]) else mod+1
-                if mod>maxID:
-                    end = (mod if (mod>phyAdr) else (phyAdr+1))
+                if phyAdr>maxID:
+                    #end = (mod if (mod>phyAdr) else (phyAdr+1))
+                    end = phyAdr
                     fd.seek(blockSize*end)
                     fd.write("0")
                     fd.flush()
