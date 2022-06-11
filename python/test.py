@@ -7,7 +7,7 @@ if __name__=="__main__":
     timeAdd=[]
     timeRead=[]
     timeDel=[]
-    for i in [8000, 17000, 42000, 60000]
+    for n in [8000, 17000, 42000, 60000]:
         dm = DiskMap(".","HashMapName")
         time_add=[]
         time_read=[]
