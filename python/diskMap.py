@@ -81,7 +81,8 @@ class DiskMap:
         mod = 3001
         inc = 803
         inc_change = 1
-        phyAdr = hashID%(mod)
+        if hashID!=None:
+            phyAdr = hashID%(mod)
         #blockSize = BLOCK_SIZE
         maxID=int(maxID)
         if(isWrite and hashID!=None):
@@ -93,6 +94,7 @@ class DiskMap:
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod #if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+2]=="1d") else mod+1
+                hashID+=mod-inc
                 if phyAdr>maxID:
                     #end = (mod if (mod>phyAdr) else (phyAdr+1))
                     end = phyAdr
@@ -146,6 +148,7 @@ class DiskMap:
                 mod+=inc
                 inc+=inc_change
                 phyAdr = hashID%mod #if (hashID>mod) else mod+1
+                hashID+=mod-inc
                 if phyAdr>maxID:
                     mm.close()
                     return None
