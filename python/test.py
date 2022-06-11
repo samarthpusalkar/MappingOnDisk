@@ -1,33 +1,65 @@
 from diskMap import DiskMap
 import os
+import time
 from diskMap import BLOCK_SIZE
+import numpy as np
 if __name__=="__main__":
-    dm = DiskMap(".","HashMapName")
-    for i in range(8000):
-        print(i)
-        if str(i) not in dm.add(str(i),i):
-            print("Failed at, ",i)
-            raise "Addition Failed"
-    for i in range(8000):
-        if str(i) not in dm.read(str(i)):
-            raise "Retrival Failed"
-    for i in range(5000,8000):
-        dm.delete(str(i))
-    for i in range(5000,8000):
-        if dm.read(str(i))!=None:
-            raise "Delete Failed"
-    for i in range(50):
-        dm.delete(str(i))
-    for i in range(50):
-        if dm.read(str(i))!=None:
-            raise "Delete Failed"
-    for i in range(8000,9000):
-        if str(i+1000) not in dm.add(str(i),i+1000):
-            print("Failed at, ",i)
-            raise "Addition Failed"
-    for i in range(8000):
-        print(dm.read(str(i)))
-    print("size before shrink ", os.path.getsize(dm.filePath)/BLOCK_SIZE)
-    dm.shrink()
-    print("size after shrink", os.path.getsize(dm.filePath)/BLOCK_SIZE)
-    dm.close()
+    timeAdd=[]
+    timeRead=[]
+    timeDel=[]
+    for i in [8000, 17000, 42000, 60000]
+        dm = DiskMap(".","HashMapName")
+        time_add=[]
+        time_read=[]
+        time_del=[]
+        for i in range(n):
+            print(i)
+            t1=time.time()
+            x=dm.add(str(i),i)
+            t= time.time()-t1
+            time_add.append(t)
+            if str(i) not in x:
+                print("Failed at, ",i)
+                raise "Addition Failed"
+        for i in range(n):
+            t1=time.time()
+            x=dm.read(str(i))
+            t=time.time()-t1
+            time_read.append(t)
+            if str(i) not in x:
+                raise "Retrival Failed"
+        for i in range(int(n*5/8),n):
+            t1=time.time()
+            dm.delete(str(i))
+            t=time.time()-t1
+            time_del.append(t)
+        for i in range(int(n*5/8),n):
+            t1=time.time()
+            x=dm.read(str(i))
+            t=time.time()-t1
+            time_read.append(t)
+            if x!=None:
+                raise "Delete Failed"
+        for i in range(int(n*5/8),n):
+            t1=time.time()
+            x=dm.add(str(i),i+1000)
+            t= time.time()-t1
+            time_add.append(t)
+            if str(i+1000) not in x:
+                print("Failed at, ",i)
+                raise "Addition Failed"
+        print("size before shrink ", os.path.getsize(dm.filePath)/BLOCK_SIZE)
+        dm.shrink()
+        print("size after shrink", os.path.getsize(dm.filePath)/BLOCK_SIZE)
+        dm.close()
+        time_add=np.array(time_add)
+        time_del=np.array(time_del)
+        time_read=np.array(time_read)
+        timeAdd.append(time_add.mean())
+        timeRead.append(time_read.mean())
+        timeDel.append(time_del.mean())
+        print(f"time complexities add:{time_add.mean()} ,read:{time_read.mean()} ,del:{time_del.mean()}")
+        os.system("rm HashMapName")
+    print("add: ", timeAdd)
+    print("read: ", timeRead)
+    print("Del: ", timeDel)
