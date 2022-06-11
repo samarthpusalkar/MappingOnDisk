@@ -95,7 +95,7 @@ class DiskMap:
                 inc+=inc_change
                 phyAdr = hashID%mod #if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+2]=="1d") else mod+1
                 hashID+=mod-inc
-                if phyAdr>maxID:
+                if phyAdr>maxID-1:
                     #end = (mod if (mod>phyAdr) else (phyAdr+1))
                     end = phyAdr
                     fd.seek(blockSize*maxID)
@@ -135,6 +135,7 @@ class DiskMap:
                             fd.seek(blockSize*phyAdr)
                             fd.write("0e")
                             fd.flush()
+                            continue
                             mm.close()
                             return True
                         except:
@@ -149,7 +150,7 @@ class DiskMap:
                 inc+=inc_change
                 phyAdr = hashID%mod #if (hashID>mod) else mod+1
                 hashID+=mod-inc
-                if phyAdr>maxID:
+                if phyAdr>maxID-1:
                     mm.close()
                     return None
             return None
