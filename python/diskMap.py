@@ -117,6 +117,7 @@ class DiskMap:
                     #mm.close()
                     #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
                     maxID = end+1
+                fd.seek(phyAdr*blockSize)
             try:
                 fd.seek(blockSize*phyAdr)
                 fd.write("1d")
