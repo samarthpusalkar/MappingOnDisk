@@ -18,23 +18,26 @@ class DiskMap:
     def add(self,key,value=None):
         if(not key):
             raise "Please Provide Key";
+        key=str(key)
         hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, isWrite=True, data=value)
+        return DiskMap.vtp(self.file, maxID, hashID, len(key), isWrite=True, data=value)
     
     def read(self,key):
         if(not key):
             raise "Please Provide Key";
+        key=str(key)
         hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID)
+        return DiskMap.vtp(self.file, maxID, hashID, len(key))
 
     def delete(self, key):
         if(not key):
             raise "Please Provide Key";
+        key=str(key)
         hashID=DiskMap.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, isWrite=False, delete=True)
+        return DiskMap.vtp(self.file, maxID, hashID, len(key), isWrite=False, delete=True)
         
     def close(self):
         self.file.close()
@@ -75,24 +78,28 @@ class DiskMap:
         hashID = 0
         for char in key:
             hashID+=12000*hashID+ord(char)
-        return hashID
+        return hashID+1321
             
-    def vtp(fd, maxID, hashID=None, isWrite=False, data=0, delete=False, shrink = False, path=None, blockSize=BLOCK_SIZE):
-        mod = 3001
+    def vtp(fd, maxID, hashID=None, keylen=1, isWrite=False, data=0, delete=False, shrink = False, path=None, blockSize=BLOCK_SIZE):
+        mod = 145
         inc = 803
-        inc_change = 1
+        inc_change = 1.18
+        phyAdr=0
         if hashID!=None:
             phyAdr = hashID%(mod)
+            inc=7*keylen
+            #phyAdr = hashID%mod
         #blockSize = BLOCK_SIZE
         maxID=int(maxID)
         if(isWrite and hashID!=None):
-            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
-            while(mm[blockSize*phyAdr:blockSize*phyAdr+2].decode("utf-8")=="1d"):
+            #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
+            fd.seek(phyAdr*blockSize)
+            while(fd.read(2)=="1d"):#(mm[blockSize*phyAdr:blockSize*phyAdr+2].decode("utf-8")=="1d"):
                 fd.seek(phyAdr*blockSize+2)
                 if str(hashID) == fd.read(len(str(hashID))):
                     break;  
                 mod+=inc
-                inc+=inc_change
+                inc=int(inc*inc_change)
                 phyAdr = hashID%mod #if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+2]=="1d") else mod+1
                 hashID+=mod-inc
                 if phyAdr>maxID-1:
@@ -107,8 +114,8 @@ class DiskMap:
                     fd.seek(blockSize*end+blockSize-2)
                     fd.write("0")
                     fd.flush()
-                    mm.close()
-                    mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
+                    #mm.close()
+                    #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_WRITE)
                     maxID = end+1
             try:
                 fd.seek(blockSize*phyAdr)
@@ -123,10 +130,10 @@ class DiskMap:
                 return None
             fd.seek(blockSize*phyAdr+2+len(str(hashID)))
             dataWritten = fd.read(blockSize-2-len(str(hashID)))
-            mm.close()
+            #mm.close()
             return dataWritten
         elif(hashID!=None):
-            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
+            #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
             while(True):
                 fd.seek(phyAdr*blockSize)
                 if (fd.read(2)=="1d" and str(hashID) == fd.read(len(str(hashID)))):
@@ -136,40 +143,42 @@ class DiskMap:
                             fd.write("0e")
                             fd.flush()
                             continue
-                            mm.close()
+                            #mm.close()
                             return True
                         except:
-                            mm.close()
+                            #mm.close()
                             return None
 
                     fd.seek(blockSize*phyAdr+2+len(str(hashID)))
                     dataRead = fd.read(blockSize-2-len(str(hashID)))
-                    mm.close()
+                    #mm.close()
                     return dataRead
                 mod+=inc
-                inc+=inc_change
+                inc=int(inc*inc_change)
                 phyAdr = hashID%mod #if (hashID>mod) else mod+1
                 hashID+=mod-inc
                 if phyAdr>maxID-1:
-                    mm.close()
+                    #mm.close()
                     return None
             return None
         elif(shrink):
             if (not path):
                 return None
-            mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
-            while(mm[blockSize*(maxID-1):blockSize*(maxID-1)+2].decode("utf-8")!="1d"):
+            #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
+            fd.seek(blockSize*(maxID-1))
+            while(fd.read(2)!="1d"):#mm[blockSize*(maxID-1):blockSize*(maxID-1)+2].decode("utf-8")!="1d"):
                 try:
                     os.truncate(path, (maxID-1)*blockSize)
                     maxID-=1
                 except OSError as error:
-                    mm.close()
+                    #mm.close()
                     return None
                 if maxID>1:
                     fd.seek((maxID-1)*blockSize)
                 else:
                     break
-            mm.close()
+                fd.seek(blockSize*(maxID-1))
+            #mm.close()
             return True
             
         
