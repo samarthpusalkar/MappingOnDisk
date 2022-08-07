@@ -81,13 +81,14 @@ class DiskMap:
         return hashID+1321
             
     def vtp(fd, maxID, hashID=None, keylen=1, isWrite=False, data=0, delete=False, shrink = False, path=None, blockSize=BLOCK_SIZE):
-        mod = 145
+        mod = 3001
         inc = 803
-        inc_change = 1.18
+        inc_change = 1.1
         phyAdr=0
         if hashID!=None:
+            #mod = (hashID%(10**keylen))+1
             phyAdr = hashID%(mod)
-            inc=7*keylen
+            inc=503
             #phyAdr = hashID%mod
         #blockSize = BLOCK_SIZE
         maxID=int(maxID)
