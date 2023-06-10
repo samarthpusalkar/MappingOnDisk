@@ -1,43 +1,43 @@
-import os;
-import mmap;
+import os
+# import mmap
 BLOCK_SIZE = 4096
-class DiskMap:
-    def __init__(self,path=".",name="test.dm"):
-        self.file = None;
+class MapD:
+    def __init__(self,name="test.mpd",path="."):
+        self.file = None
         self.filePath = os.path.join(path,name)
         if os.path.exists(os.path.join(path,name)):
-            self.file = open(os.path.join(path,name),"r+");
-            #self.file.write(0);
-            return;
-        os.makedirs(os.path.basename(path),exist_ok=True);
+            self.file = open(os.path.join(path,name),"r+")
+            #self.file.write(0)
+            return
+        os.makedirs(os.path.basename(path),exist_ok=True)
         self.file = open(self.filePath,"w+")
         self.file.write("0")
         self.file.flush()
-        return;
+        return
     
     def add(self,key,value=None):
         if(not key):
-            raise "Please Provide Key";
+            raise "Please Provide Key"
         key=str(key)
-        hashID=DiskMap.hash(key)
+        hashID=MapD.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, len(key), isWrite=True, data=value)
+        return MapD.vtp(self.file, maxID, hashID, len(key), isWrite=True, data=value)
     
     def read(self,key):
         if(not key):
-            raise "Please Provide Key";
+            raise "Please Provide Key"
         key=str(key)
-        hashID=DiskMap.hash(key)
+        hashID=MapD.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, len(key))
+        return MapD.vtp(self.file, maxID, hashID, len(key))
 
     def delete(self, key):
         if(not key):
-            raise "Please Provide Key";
+            raise "Please Provide Key"
         key=str(key)
-        hashID=DiskMap.hash(key)
+        hashID=MapD.hash(key)
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, hashID, len(key), isWrite=False, delete=True)
+        return MapD.vtp(self.file, maxID, hashID, len(key), isWrite=False, delete=True)
         
     def close(self):
         self.file.close()
@@ -45,9 +45,9 @@ class DiskMap:
 
     def shrink(self):
         maxID = os.path.getsize(self.filePath)/BLOCK_SIZE
-        return DiskMap.vtp(self.file, maxID, None, isWrite=False, delete=True, shrink=True, path=self.filePath)
+        return MapD.vtp(self.file, maxID, None, isWrite=False, delete=True, shrink=True, path=self.filePath)
     """def seekTo(self,key):
-        self.file.seek(0);
+        self.file.seek(0)
         for i in range(len(key)):
             reqGroup = key[0:i]
             group = ""
@@ -98,7 +98,7 @@ class DiskMap:
             while(fd.read(2)=="1d"):#(mm[blockSize*phyAdr:blockSize*phyAdr+2].decode("utf-8")=="1d"):
                 fd.seek(phyAdr*blockSize+2)
                 if str(hashID) == fd.read(len(str(hashID))):
-                    break;  
+                    break  
                 mod+=inc
                 inc=int(inc*inc_change)
                 phyAdr = hashID%mod #if (hashID>mod or not mm[blockSize*(hashID%mod):blockSize*(hashID%mod)+2]=="1d") else mod+1
