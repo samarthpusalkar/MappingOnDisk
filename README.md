@@ -3,7 +3,7 @@ An effort to make a map system which can be stored on hard disk/SSDs and other n
 
 ## Usage
 
-from mapD import MapD
+from mapDisk import MapD
 
 create the hashed map file object
     md = MapD("HashMapName.md","path/to/file")

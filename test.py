@@ -1,7 +1,7 @@
-from src.mapD import MapD
+from src.mapDisk import MapD
 import os
 import time
-from src.mapD import BLOCK_SIZE
+from src.mapDisk import BLOCK_SIZE
 import numpy as np
 if __name__=="__main__":
     timeAdd=[]
