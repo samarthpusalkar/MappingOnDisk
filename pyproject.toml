@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapDisk"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Samarth Pusalkar", email="samar29p@gmail.com" },
 ]

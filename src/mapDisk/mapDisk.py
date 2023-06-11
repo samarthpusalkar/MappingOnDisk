@@ -133,7 +133,7 @@ class MapD:
             fd.seek(blockSize*phyAdr+2+len(str(hashID)))
             dataWritten = fd.read(blockSize-2-len(str(hashID)))
             #mm.close()
-            return dataWritten
+            return dataWritten.rstrip("\x00")
         elif(hashID!=None):
             #mm = mmap.mmap(fd.fileno(),0,prot=mmap.ACCESS_READ)
             while(True):
@@ -154,7 +154,7 @@ class MapD:
                     fd.seek(blockSize*phyAdr+2+len(str(hashID)))
                     dataRead = fd.read(blockSize-2-len(str(hashID)))
                     #mm.close()
-                    return dataRead
+                    return dataRead.rstrip("\x00")
                 mod+=inc
                 inc=int(inc*inc_change)
                 phyAdr = hashID%mod #if (hashID>mod) else mod+1
