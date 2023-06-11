@@ -1,12 +1,16 @@
 # MappingOnDisk
 An effort to make a map system which can be stored on hard disk/SSDs and other non voletile media.
 
+## Installation
+
+pip install mapdisk
+
 ## Usage
 
-from mapDisk import MapD
+from mapDisk import mapDisk
 
 create the hashed map file object
-    md = MapD("HashMapName.md","path/to/file")
+    md = mapDisk.MapD("HashMapName.md","path/to/file")
 
 "HashMapName.mpd" is the name of the database file, it is created if it does not already exists and read otherwise
 path/to/file is "." by default
