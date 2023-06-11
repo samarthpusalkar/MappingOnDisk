@@ -1,7 +1,7 @@
-from src.mapDisk import MapD
+from src.mapDisk.mapDisk import MapD
 import os
 import time
-from src.mapDisk import BLOCK_SIZE
+from src.mapDisk.mapDisk import BLOCK_SIZE
 import numpy as np
 if __name__=="__main__":
     timeAdd=[]
@@ -18,6 +18,7 @@ if __name__=="__main__":
             x=md.add(str(i),i)
             t= time.time()-t1
             time_add.append(t)
+            print(len(x),"test length")
             if str(i) not in x:
                 print("Failed at, ",i)
                 raise "Addition Failed"
