@@ -17,6 +17,7 @@ Adding key-value pairs
 md.add("key","value")
 
 key and value are converted to string and then stored for current implementation, returns the value stored for validating written data
+the same function is used to overwrite the previous data/value
 
 
 Reading value
@@ -39,6 +40,6 @@ can be called to shrink datafile if some delete operations are performed, isn't 
 
 md.close()
 
-It should be called at the end of data operations to close file discriptors
+It should be called at the end of data operations to close file descriptors
 
 The above operations return None if they fail for some reason, this can be used to check for failures
