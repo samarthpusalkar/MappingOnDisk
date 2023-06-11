@@ -23,7 +23,7 @@ Reading value
 
 md.read(str("key))
 
-returns the value in string format, but it also appends with null dato to extend the value to BLOCK_SIZE for current implementation, need to resolve to returning only the required data in required dtype, but for now we can store and retrive in string format, and the data is contained in the initial characters of the string, user can use escape characters to mark the end of data while adding in string format and trim to that character when reading
+returns the value in string format, only catch is if the value contains \x00 at the end it will be trimmed off for current implementation as a temporary fix
 
 
 Deleting value
@@ -36,3 +36,7 @@ md.shrink()
 
 can be called to shrink datafile if some delete operations are performed, isn't called by default after delete operation.
 
+
+md.close()
+
+It should be called at the end of data operations to close file discriptors
